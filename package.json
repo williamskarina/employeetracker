@@ -1,0 +1,27 @@
+{
+  "name": "employeetracker",
+  "version": "1.0.0",
+  "description": "## Your Task",
+  "main": "index.js",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.1.5",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/williamskarina/employeetracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/williamskarina/employeetracker/issues"
+  },
+  "homepage": "https://github.com/williamskarina/employeetracker#readme"
+}
