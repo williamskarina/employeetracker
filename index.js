@@ -27,7 +27,6 @@ inquirer
       "View Employees",
       "View Employees by Department",
       "Add Employee",
-      "Remove Employees",
       "Update Employee Role",
       "Add Role",
       "Exit"]
@@ -45,14 +44,10 @@ inquirer
       case "Add Employee":
         addEmployee();
         break;
-
-      case "Remove Employees":
-        removeEmployees();
-        break;
-
-      case "Update Employee Role":
-        updateEmployeeRole();
-        break;
+        
+    case "Update Employee Role":
+          updateEmployeeRole();
+          break;
 
       case "Add Role":
         addRole();
@@ -95,8 +90,7 @@ FROM employee e
 LEFT JOIN role r
 ON e.role_id = r.id
 LEFT JOIN department d
-ON d.id = r.department_id
-GROUP BY d.id, d.name`
+ON d.id = r.department_id`
 
 connection.query(query, function (err, res) {
   if (err) throw err;
@@ -145,7 +139,6 @@ WHERE d.id = ?`
   });
 }
 
-
 function addEmployee() {
 
 var query =
@@ -165,6 +158,32 @@ connection.query(query, function (err, res) {
 });
 }
 
+function employeeArray() {
+  console.log("Updating an employee");
+
+  var query =
+    `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
+  FROM employee e
+  JOIN role r
+	ON e.role_id = r.id
+  JOIN department d
+  ON d.id = r.department_id
+  JOIN employee m
+	ON m.id = e.manager_id`
+
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+
+    const employeeChoices = res.map(({ id, first_name, last_name }) => ({
+      value: id, name: `${first_name} ${last_name}`      
+    }));
+
+    console.table(res);
+    console.log("employeeArray To Update!\n")
+
+    roleArray(employeeChoices);
+  });
+}
 function promptInsert(roleChoices) {
 
 inquirer
@@ -201,93 +220,13 @@ inquirer
         if (err) throw err;
 
         console.table(res);
-        console.log(res.insertedRows + "Inserted successfully!\n");
 
         firstPrompt();
       });
   });
 }
 
-function removeEmployees() {
-console.log("Deleting an employee");
-
-var query =
-  `SELECT e.id, e.first_name, e.last_name
-    FROM employee e`
-
-connection.query(query, function (err, res) {
-  if (err) throw err;
-
-  const deleteEmployeeChoices = res.map(({ id, first_name, last_name }) => ({
-    value: id, name: `${id} ${first_name} ${last_name}`
-  }));
-
-  console.table(res);
-  console.log("ArrayToDelete!\n");
-
-  promptDelete(deleteEmployeeChoices);
-});
-}
-
-function promptDelete(deleteEmployeeChoices) {
-
-inquirer
-  .prompt([
-    {
-      type: "list",
-      name: "employeeId",
-      message: "Which employee do you want to remove?",
-      choices: deleteEmployeeChoices
-    }
-  ])
-  .then(function (answer) {
-
-    var query = `DELETE FROM employee WHERE ?`;
-    connection.query(query, { id: answer.employeeId }, function (err, res) {
-      if (err) throw err;
-
-      console.table(res);
-      console.log(res.affectedRows + "Deleted!\n");
-
-      firstPrompt();
-    });
-  });
-}
-
-function updateEmployeeRole() { 
-employeeArray();
-
-}
-
-function employeeArray() {
-console.log("Updating an employee");
-
-var query =
-  `SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
-FROM employee e
-JOIN role r
-ON e.role_id = r.id
-JOIN department d
-ON d.id = r.department_id
-JOIN employee m
-ON m.id = e.manager_id`
-
-connection.query(query, function (err, res) {
-  if (err) throw err;
-
-  const employeeChoices = res.map(({ id, first_name, last_name }) => ({
-    value: id, name: `${first_name} ${last_name}`      
-  }));
-
-  console.table(res);
-  console.log("employeeArray To Update!\n")
-
-  roleArray(employeeChoices);
-});
-}
-
 function roleArray(employeeChoices) {
-console.log("Updating an role");
 
 var query =
   `SELECT r.id, r.title, r.salary 
@@ -302,7 +241,6 @@ connection.query(query, function (err, res) {
   }));
 
   console.table(res);
-  console.log("roleArray to Update!\n")
 
   promptEmployeeRole(employeeChoices, roleChoices);
 });
@@ -336,15 +274,11 @@ inquirer
         if (err) throw err;
 
         console.table(res);
-        console.log(res.affectedRows + "Updated successfully!");
 
         firstPrompt();
       });
   });
 }
-
-
-
 
 function addRole() {
 
@@ -382,16 +316,16 @@ inquirer
       message: "Role title?"
     },
     {
-      type: "input",
-      name: "roleSalary",
-      message: "Role Salary"
-    },
-    {
       type: "list",
       name: "departmentId",
       message: "Department?",
       choices: departmentChoices
     },
+    {
+      type: "input",
+      name: "salary",
+      message: "What is their salary?"
+    }
   ])
   .then(function (answer) {
 
@@ -406,7 +340,6 @@ inquirer
         if (err) throw err;
 
         console.table(res);
-        console.log("Role Inserted!");
 
         firstPrompt();
       });
